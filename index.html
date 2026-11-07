@@ -1,33 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack a Mole - Arcade Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <title>Document</title>
 </head>
 <body>
-    <div id="game-over-screen" style="display: none; ">
-        <h1>Game Over</h1>
-        <p>Waktu telah habis!</p>
-        <button onclick="restartGame()">Mulai Ulang</button>
-     </div> 
-    <h1 class="score" id="score">SCORE: <span>00</span></h1>
-    <h2 class="time-left" id="timee">Time Left: <span id="time-left">60</span></h2>
-    <div class="board" id="BOARD">
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-        <div class="hole"></div>
-    </div>
-    <div class="cursor"></div>
-    
-    <script src="main.js"></script>
+    <header class="top-bar" aria-label="Status Permainan">
+        <div class="brand-mini">
+            <img src="assets/hammer.png" alt="" width="28" height="31" fetchpriority="high">
+            <span>Whack a Mole</span>
+        </div>
+        <div class="top-actions">
+            <div class="best-pill" title="Skor tertinggi yang tersimpan di perangkat ini">
+                <span class="best-label">Rekor:</span>
+                <strong id="header-high-score">0</strong>
+            </div>
+            <button type="button" id="sound-toggle" class="icon-btn" aria-label="Matikan atau nyalakan suara" aria-pressed="true">
+                <span id="sound-label">Suara: ON</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-stage">
+        <!-- LANDING SCREEN -->
+        <section id="landing-screen" class="screen landing-screen" aria-labelledby="game-title">
+            <div class="landing-card">
+                <div class="landing-hero">
+                    <div class="mascot-stage" aria-hidden="true">
+                        <div class="mascot-hole">
+                            <img src="assets/mole.png" alt="" width="110" height="136" class="mascot-mole" fetchpriority="high">
+                        </div>
+                        <img src="assets/hammer.png" alt="" width="84" height="92" class="mascot-hammer" fetchpriority="high">
+                    </div>
+
+                    <div class="landing-copy">
+                        <h1 id="game-title">Whack a Mole!</h1>
+                        <p class="subtitle">
+                            Pukul tikus tanah secepat mungkin sebelum mereka sembunyi kembali ke dalam lubang. Raih kombo beruntun dan cetak skor tertinggi!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="difficulty-section" role="group" aria-labelledby="diff-heading">
+                    <h2 id="diff-heading" class="section-label">Pilih Tingkat Kesulitan</h2>
+                    <div class="difficulty-grid">
+                        <button type="button" class="diff-btn" data-difficulty="mudah" aria-pressed="false">
+                            <span class="diff-name">Santai</span>
+                            <span class="diff-meta">45 dtk • Gerak Lambat</span>
+                        </button>
+                        <button type="button" class="diff-btn active" data-difficulty="normal" aria-pressed="true">
+                            <span class="diff-name">Normal</span>
+                            <span class="diff-meta">30 dtk • Gerak Standar</span>
+                        </button>
+                        <button type="button" class="diff-btn" data-difficulty="sulit" aria-pressed="false">
+                            <span class="diff-name">Kilat</span>
+                            <span class="diff-meta">25 dtk • Gerak Cepat</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rules-panel" aria-label="Aturan Permainan">
+                    <div class="rule-item">
+                        <strong>+10 Poin</strong>
+                        <span>Setiap pukulan tepat sasaran</span>
+                    </div>
+                    <div class="rule-item">
+                        <strong>+1 Detik</strong>
+                        <span>Bonus waktu saat kombo 3x</span>
+                    </div>
+                    <div class="rule-item">
+                        <strong>Tombol 1-9</strong>
+                        <span>Bisa dimainkan lewat klik atau keyboard</span>
+                    </div>
+                </div>
+
+                <div class="landing-cta-row">
+                    <button type="button" id="start-btn" class="primary-btn">
+                        Mulai Permainan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAMEPLAY SCREEN -->
+        <section id="game-screen" class="screen game-screen hidden" aria-label="Arena Permainan">
+            <div class="hud-bar">
+                <div class="hud-stat">
+                    <span class="hud-label">Skor</span>
+                    <strong class="hud-value" id="score-val">0</strong>
+                </div>
+                <div class="hud-stat timer-stat" id="timer-box">
+                    <span class="hud-label">Sisa Waktu</span>
+                    <strong class="hud-value"><span id="time-left">30</span>d</strong>
+                </div>
+                <div class="hud-stat">
+                    <span class="hud-label">Kombo</span>
+                    <strong class="hud-value" id="combo-val">0x</strong>
+                </div>
+                <div class="hud-controls">
+                    <button type="button" id="pause-btn" class="secondary-btn">Jeda</button>
+                    <button type="button" id="quit-btn" class="secondary-btn">Menu</button>
+                </div>
+            </div>
+
+            <div class="board" id="BOARD" role="grid" aria-label="Lubang Tikus Tanah">
+                <button type="button" class="hole" data-index="0" aria-label="Lubang 1"><span class="hole-key" aria-hidden="true">1</span></button>
+                <button type="button" class="hole" data-index="1" aria-label="Lubang 2"><span class="hole-key" aria-hidden="true">2</span></button>
+                <button type="button" class="hole" data-index="2" aria-label="Lubang 3"><span class="hole-key" aria-hidden="true">3</span></button>
+                <button type="button" class="hole" data-index="3" aria-label="Lubang 4"><span class="hole-key" aria-hidden="true">4</span></button>
+                <button type="button" class="hole" data-index="4" aria-label="Lubang 5"><span class="hole-key" aria-hidden="true">5</span></button>
+                <button type="button" class="hole" data-index="5" aria-label="Lubang 6"><span class="hole-key" aria-hidden="true">6</span></button>
+                <button type="button" class="hole" data-index="6" aria-label="Lubang 7"><span class="hole-key" aria-hidden="true">7</span></button>
+                <button type="button" class="hole" data-index="7" aria-label="Lubang 8"><span class="hole-key" aria-hidden="true">8</span></button>
+                <button type="button" class="hole" data-index="8" aria-label="Lubang 9"><span class="hole-key" aria-hidden="true">9</span></button>
+            </div>
+        </section>
+
+        <!-- PAUSE MODAL -->
+        <div id="pause-screen" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+            <div class="modal-card">
+                <h2 id="pause-title">Permainan Dijeda</h2>
+                <p>Istirahat sejenak. Siap melanjutkan berburu tikus tanah?</p>
+                <div class="modal-actions">
+                    <button type="button" id="resume-btn" class="primary-btn">Lanjutkan Main</button>
+                    <button type="button" id="pause-menu-btn" class="secondary-btn">Kembali ke Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME OVER MODAL -->
+        <div id="game-over-screen" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+            <div class="modal-card">
+                <div class="gameover-illustration" aria-hidden="true">
+                    <img src="assets/mole-whacked.png" alt="" width="88" height="106">
+                </div>
+                <p id="new-record-banner" class="record-banner hidden">Rekor Baru Tercapai!</p>
+                <h2 id="gameover-title">Waktu Habis!</h2>
+                <p class="gameover-sub">Berikut hasil pukulanmu pada ronde ini:</p>
+
+                <div class="summary-grid">
+                    <div class="summary-box">
+                        <span class="summary-label">Skor Akhir</span>
+                        <strong class="summary-val" id="final-score">0</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span class="summary-label">Rekor Terbaik</span>
+                        <strong class="summary-val" id="best-score">0</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span class="summary-label">Tikus Terpukul</span>
+                        <strong class="summary-val" id="moles-hit">0</strong>
+                    </div>
+                    <div class="summary-box">
+                        <span class="summary-label">Akurasi</span>
+                        <strong class="summary-val" id="hit-accuracy">0%</strong>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="restart-btn" class="primary-btn">Main Lagi</button>
+                    <button type="button" id="home-btn" class="secondary-btn">Ubah Kesulitan / Menu</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>Gunakan klik mouse, sentuhan layar, atau tombol angka <code>1</code> sampai <code>9</code> untuk memukul.</p>
+    </footer>
+
+    <div class="cursor" id="hammer-cursor" aria-hidden="true"></div>
+
+    <script src="main.js" defer></script>
 </body>
 </html>
